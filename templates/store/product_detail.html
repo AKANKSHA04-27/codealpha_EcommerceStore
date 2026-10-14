@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load store_tags %}
+
+{% block title %}{{ product.name }} | CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'store:product_list' %}">Products</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'store:product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Product Details -->
+    <div class="row bg-white rounded shadow-sm p-4 mb-5 border">
+        <!-- Product Image -->
+        <div class="col-md-6 mb-4 mb-md-0 d-flex justify-content-center align-items-center bg-light rounded py-4 position-relative">
+            {% if product.discount_percentage > 0 %}
+            <span class="badge bg-danger position-absolute top-0 start-0 m-3 fs-6 z-1">-{{ product.discount_percentage }}%</span>
+            {% endif %}
+            <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/600x600/e2e8f0/64748b?text={{ product.name|urlencode }}{% endif %}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 400px; object-fit: contain;">
+        </div>
+
+        <!-- Product Info -->
+        <div class="col-md-6 ps-md-5">
+            <div class="mb-2">
+                <a href="{% url 'store:product_list' %}?category={{ product.category.slug }}" class="badge bg-secondary text-decoration-none">{{ product.category.name }}</a>
+            </div>
+            
+            <h2 class="fw-bold mb-3">{{ product.name }}</h2>
+            
+            <div class="d-flex align-items-center mb-3">
+                <span class="display-6 fw-bold text-primary me-3">${{ product.price|floatformat:2 }}</span>
+                {% if product.compare_price %}
+                <span class="text-muted text-decoration-line-through fs-4">${{ product.compare_price|floatformat:2 }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4">
+                {% if product.is_in_stock %}
+                <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> In Stock ({{ product.stock }} available)</span>
+                {% else %}
+                <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-x-circle me-1"></i> Out of Stock</span>
+                {% endif %}
+            </div>
+            
+            <p class="lead fs-6 mb-4">{{ product.description }}</p>
+            
+            <hr class="mb-4 border-secondary opacity-25">
+            
+            <!-- Add to Cart Form -->
+            <form action="{% url 'store:add_to_cart' product.id %}" method="POST" class="mb-4">
+                {% csrf_token %}
+                <div class="row g-3 align-items-end">
+                    <div class="col-auto">
+                        <label for="quantity" class="form-label fw-bold small text-muted">Quantity</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock|default:1 }}" {% if not product.is_in_stock %}disabled{% endif %} style="width: 100px;">
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" {% if not product.is_in_stock %}disabled{% endif %}>
+                            <i class="bi bi-cart-plus me-2"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Features list -->
+            <ul class="list-unstyled mt-4 text-muted small">
+                <li class="mb-2"><i class="bi bi-shield-check text-success me-2"></i> 1 Year Warranty</li>
+                <li class="mb-2"><i class="bi bi-arrow-return-left text-primary me-2"></i> 30-Day Return Policy</li>
+                <li><i class="bi bi-truck text-info me-2"></i> Free shipping on orders over $50</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-5">
+        <h3 class="fw-bold mb-4">Related Products</h3>
+        <div class="row g-4">
+            {% for related in related_products|slice:":4" %}
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <a href="{% url 'store:product_detail' related.slug %}">
+                        <img src="{% if related.image %}{{ related.image.url }}{% else %}https://placehold.co/400x400/e2e8f0/64748b?text={{ related.name|urlencode }}{% endif %}" class="card-img-top p-3" alt="{{ related.name }}" style="height: 200px; object-fit: contain;">
+                    </a>
+                    <div class="card-body">
+                        <h6 class="card-title text-truncate">
+                            <a href="{% url 'store:product_detail' related.slug %}" class="text-decoration-none text-dark">{{ related.name }}</a>
+                        </h6>
+                        <div class="fw-bold text-primary">${{ related.price|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

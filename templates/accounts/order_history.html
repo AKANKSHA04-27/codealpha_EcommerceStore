@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Order History | CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold mb-0">Order History</h1>
+        <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Profile</a>
+    </div>
+
+    {% if orders %}
+        <div class="row g-4">
+            {% for order in orders %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light py-3 px-4 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-1 text-primary">Order #{{ order.order_number }}</h5>
+                            <span class="text-muted small">Placed on {{ order.created_at|date:"F d, Y \a\t g:i A" }}</span>
+                        </div>
+                        <div>
+                            {% if order.status == 'pending' %}
+                            <span class="badge bg-warning text-dark px-3 py-2 fs-6">Pending</span>
+                            {% elif order.status == 'processing' %}
+                            <span class="badge bg-info text-dark px-3 py-2 fs-6">Processing</span>
+                            {% elif order.status == 'shipped' %}
+                            <span class="badge bg-primary px-3 py-2 fs-6">Shipped</span>
+                            {% elif order.status == 'delivered' %}
+                            <span class="badge bg-success px-3 py-2 fs-6">Delivered</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger px-3 py-2 fs-6">Cancelled</span>
+                            {% else %}
+                            <span class="badge bg-secondary px-3 py-2 fs-6">{{ order.get_status_display }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-borderless align-middle mb-0">
+                                <thead class="border-bottom small text-muted">
+                                    <tr>
+                                        <th class="ps-4 py-3">Product</th>
+                                        <th class="py-3">Price</th>
+                                        <th class="py-3">Quantity</th>
+                                        <th class="pe-4 py-3 text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order.items.all %}
+                                    <tr class="border-bottom border-light">
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <a href="{% url 'store:product_detail' item.product.slug %}" class="text-decoration-none text-dark fw-bold">
+                                                    {{ item.product.name }}
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="py-3 text-muted">${{ item.price|floatformat:2 }}</td>
+                                        <td class="py-3 text-muted">{{ item.quantity }}</td>
+                                        <td class="pe-4 py-3 text-end fw-bold">${{ item.subtotal|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-white py-3 px-4 border-top">
+                        <div class="d-flex justify-content-end align-items-center">
+                            <span class="text-muted me-3">Total Amount:</span>
+                            <span class="fs-4 fw-bold text-primary">${{ order.total|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card border-0 shadow-sm py-5 text-center">
+            <div class="card-body">
+                <i class="bi bi-receipt display-1 text-muted mb-4 d-block"></i>
+                <h2 class="fw-bold mb-3">No orders found</h2>
+                <p class="text-muted mb-4">You haven't placed any orders yet. Once you make a purchase, your order history will appear here.</p>
+                <a href="{% url 'store:product_list' %}" class="btn btn-primary btn-lg px-5">Start Shopping</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

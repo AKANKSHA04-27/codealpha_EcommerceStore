@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile | CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="fw-bold mb-4">My Account</h1>
+    
+    <div class="row">
+        <!-- Profile Info (Left) -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 6rem;"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ user.first_name }} {{ user.last_name }}</h3>
+                    <p class="text-muted mb-3">{{ user.email }}</p>
+                    
+                    <div class="badge bg-light text-dark mb-4 p-2 border">
+                        <i class="bi bi-calendar3 me-1"></i> Member since {{ user.date_joined|date:"M Y" }}
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary"><i class="bi bi-pencil-square me-2"></i> Edit Profile</a>
+                        <a href="{% url 'accounts:order_history' %}" class="btn btn-outline-secondary"><i class="bi bi-box-seam me-2"></i> View All Orders</a>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-white border-top p-4">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-geo-alt text-primary me-2"></i> Default Address</h6>
+                    {% if user.profile.address %}
+                    <p class="mb-1 text-muted">{{ user.profile.address }}</p>
+                    <p class="mb-1 text-muted">{{ user.profile.city }}, {{ user.profile.state }} {{ user.profile.zip_code }}</p>
+                    <p class="mb-0 text-muted"><i class="bi bi-telephone me-1"></i> {{ user.profile.phone }}</p>
+                    {% else %}
+                    <p class="text-muted fst-italic mb-0">No address saved yet. Update your profile to add one.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Orders (Right) -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i> Recent Orders</h4>
+                    {% if recent_orders %}
+                    <a href="{% url 'accounts:order_history' %}" class="text-decoration-none small">View All</a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small">
+                                <tr>
+                                    <th class="py-3 ps-4">Order #</th>
+                                    <th class="py-3">Date</th>
+                                    <th class="py-3">Total</th>
+                                    <th class="py-3">Status</th>
+                                    <th class="py-3 pe-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark py-3">#{{ order.order_number }}</td>
+                                    <td class="text-muted py-3">{{ order.created_at|date:"M d, Y" }}</td>
+                                    <td class="fw-bold py-3">${{ order.total|floatformat:2 }}</td>
+                                    <td class="py-3">
+                                        {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% elif order.status == 'processing' %}
+                                        <span class="badge bg-info text-dark">Processing</span>
+                                        {% elif order.status == 'shipped' %}
+                                        <span class="badge bg-primary">Shipped</span>
+                                        {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-success">Delivered</span>
+                                        {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-4 text-end py-3">
+                                        <a href="#" class="btn btn-sm btn-outline-secondary">Details</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-box2 display-4 text-muted mb-3 d-block"></i>
+                        <h5 class="fw-bold text-dark">No orders yet</h5>
+                        <p class="text-muted mb-4">You haven't placed any orders with us yet.</p>
+                        <a href="{% url 'store:product_list' %}" class="btn btn-primary">Start Shopping</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load store_tags %}
+
+{% block title %}Checkout | CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="fw-bold mb-4">Checkout</h1>
+    
+    <div class="row">
+        <!-- Shipping Form -->
+        <div class="col-lg-7 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-truck me-2 text-primary"></i> Shipping Details</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'store:checkout' %}">
+                        {% csrf_token %}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email Address</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label">Phone Number</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="text-danger small mt-1">{{ form.address.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-5">
+                                <label for="{{ form.city.id_for_label }}" class="form-label">City</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="text-danger small mt-1">{{ form.city.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.state.id_for_label }}" class="form-label">State</label>
+                                {{ form.state }}
+                                {% if form.state.errors %}
+                                <div class="text-danger small mt-1">{{ form.state.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label for="{{ form.zip_code.id_for_label }}" class="form-label">Zip Code</label>
+                                {{ form.zip_code }}
+                                {% if form.zip_code.errors %}
+                                <div class="text-danger small mt-1">{{ form.zip_code.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{% url 'store:cart' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back to Cart</a>
+                            <button type="submit" class="btn btn-primary float-end px-4 fw-bold">Place Order <i class="bi bi-check-circle ms-1"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm bg-light">
+                <div class="card-header bg-white py-3">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-bag-check me-2 text-primary"></i> Order Summary</h4>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-group list-group-flush bg-transparent mb-3">
+                        {% for item in cart_items %}
+                        <li class="list-group-item d-flex justify-content-between lh-sm bg-transparent px-0 border-light">
+                            <div>
+                                <h6 class="my-0">{{ item.product.name }}</h6>
+                                <small class="text-muted">Qty: {{ item.quantity }} x ${{ item.product.price|floatformat:2 }}</small>
+                            </div>
+                            <span class="text-dark">${{ item.subtotal|floatformat:2 }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span>${{ cart_total|floatformat:2 }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Shipping</span>
+                        <span class="text-success fw-bold">Free</span>
+                    </div>
+                    
+                    <hr class="border-secondary opacity-50">
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold fs-5">Total</span>
+                        <span class="fw-bold fs-4 text-primary">${{ cart_total|floatformat:2 }}</span>
+                    </div>
+                    
+                    <!-- Note: Payment integration would go here -->
+                    <div class="alert alert-info mt-4 small mb-0">
+                        <i class="bi bi-info-circle me-1"></i> This is a demo store. Payment processing is simulated. Clicking "Place Order" will create the order directly.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile | CodeAlpha Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8" style="max-width: 600px;">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-pencil-square me-2"></i> Edit Profile</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{% url 'accounts:edit_profile' %}">
+                        {% csrf_token %}
+                        
+                        <h5 class="fw-bold mb-3 border-bottom pb-2">Account Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label for="{{ u_form.username.id_for_label }}" class="form-label text-muted small">Username</label>
+                                {{ u_form.username }}
+                                {% if u_form.username.errors %}<div class="text-danger small mt-1">{{ u_form.username.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ u_form.first_name.id_for_label }}" class="form-label text-muted small">First Name</label>
+                                {{ u_form.first_name }}
+                                {% if u_form.first_name.errors %}<div class="text-danger small mt-1">{{ u_form.first_name.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ u_form.last_name.id_for_label }}" class="form-label text-muted small">Last Name</label>
+                                {{ u_form.last_name }}
+                                {% if u_form.last_name.errors %}<div class="text-danger small mt-1">{{ u_form.last_name.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ u_form.email.id_for_label }}" class="form-label text-muted small">Email Address</label>
+                                {{ u_form.email }}
+                                {% if u_form.email.errors %}<div class="text-danger small mt-1">{{ u_form.email.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        
+                        <h5 class="fw-bold mb-3 border-bottom pb-2">Address Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label for="{{ p_form.phone.id_for_label }}" class="form-label text-muted small">Phone Number</label>
+                                {{ p_form.phone }}
+                                {% if p_form.phone.errors %}<div class="text-danger small mt-1">{{ p_form.phone.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <label for="{{ p_form.address.id_for_label }}" class="form-label text-muted small">Street Address</label>
+                                {{ p_form.address }}
+                                {% if p_form.address.errors %}<div class="text-danger small mt-1">{{ p_form.address.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-5">
+                                <label for="{{ p_form.city.id_for_label }}" class="form-label text-muted small">City</label>
+                                {{ p_form.city }}
+                                {% if p_form.city.errors %}<div class="text-danger small mt-1">{{ p_form.city.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ p_form.state.id_for_label }}" class="form-label text-muted small">State</label>
+                                {{ p_form.state }}
+                                {% if p_form.state.errors %}<div class="text-danger small mt-1">{{ p_form.state.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label for="{{ p_form.zip_code.id_for_label }}" class="form-label text-muted small">Zip Code</label>
+                                {{ p_form.zip_code }}
+                                {% if p_form.zip_code.errors %}<div class="text-danger small mt-1">{{ p_form.zip_code.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a href="{% url 'accounts:profile' %}" class="text-muted text-decoration-none">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 fw-bold">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load store_tags %}
+
+{% block title %}
+{% if current_category %}{{ current_category.name }}{% elif search_query %}Search: {{ search_query }}{% else %}All Products{% endif %} | CodeAlpha Store
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                    Categories
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'store:product_list' %}{% if search_query %}?q={{ search_query }}{% endif %}" 
+                       class="list-group-item list-group-item-action {% if not current_category %}active bg-primary border-primary{% endif %}">
+                        All Products
+                    </a>
+                    {% for cat in categories %}
+                    <a href="{% url 'store:product_list' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query }}{% endif %}" 
+                       class="list-group-item list-group-item-action {% if current_category.slug == cat.slug %}active bg-primary border-primary{% endif %}">
+                        {{ cat.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-bold py-3">
+                    Sort By
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="?{% if current_category %}category={{ current_category.slug }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=-created_at" class="list-group-item list-group-item-action {% if sort_by == '-created_at' or not sort_by %}fw-bold text-primary{% endif %}">Newest</a>
+                    <a href="?{% if current_category %}category={{ current_category.slug }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=price" class="list-group-item list-group-item-action {% if sort_by == 'price' %}fw-bold text-primary{% endif %}">Price: Low to High</a>
+                    <a href="?{% if current_category %}category={{ current_category.slug }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=-price" class="list-group-item list-group-item-action {% if sort_by == '-price' %}fw-bold text-primary{% endif %}">Price: High to Low</a>
+                    <a href="?{% if current_category %}category={{ current_category.slug }}&{% endif %}{% if search_query %}q={{ search_query }}&{% endif %}sort=name" class="list-group-item list-group-item-action {% if sort_by == 'name' %}fw-bold text-primary{% endif %}">Name: A to Z</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded">
+                <h1 class="h3 mb-0 fw-bold">
+                    {% if search_query %}
+                        Search Results for "{{ search_query }}"
+                    {% elif current_category %}
+                        {{ current_category.name }}
+                    {% else %}
+                        All Products
+                    {% endif %}
+                </h1>
+                <div class="text-muted small">
+                    Showing {{ products.start_index }}-{{ products.end_index }} of {{ products.paginator.count }} results
+                </div>
+            </div>
+            
+            <!-- Products Grid -->
+            {% if products %}
+            <div class="row g-4 mb-4">
+                {% for product in products %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        <div class="position-relative">
+                            {% if product.discount_percentage > 0 %}
+                            <span class="badge bg-danger position-absolute top-0 start-0 m-2 z-1">-{{ product.discount_percentage }}%</span>
+                            {% endif %}
+                            <a href="{% url 'store:product_detail' product.slug %}">
+                                <img src="{% if product.image %}{{ product.image.url }}{% else %}https://placehold.co/400x400/e2e8f0/64748b?text={{ product.name|urlencode }}{% endif %}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 220px; object-fit: contain;">
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-1">
+                                <span class="badge bg-light text-secondary">{{ product.category.name }}</span>
+                            </div>
+                            <h6 class="card-title mb-2">
+                                <a href="{% url 'store:product_detail' product.slug %}" class="text-decoration-none text-dark">{{ product.name }}</a>
+                            </h6>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="fw-bold text-primary">${{ product.price|floatformat:2 }}</span>
+                                    {% if product.compare_price %}
+                                    <span class="text-muted text-decoration-line-through small">${{ product.compare_price|floatformat:2 }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if product.is_in_stock %}
+                                <form action="{% url 'store:add_to_cart' product.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-outline-primary w-100 btn-sm"><i class="bi bi-cart-plus me-1"></i> Add to Cart</button>
+                                </form>
+                                {% else %}
+                                <button class="btn btn-secondary w-100 btn-sm" disabled>Out of Stock</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <nav aria-label="Product pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.previous_page_number }}{% if current_category %}&category={{ current_category.slug }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Previous</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if current_category %}&category={{ current_category.slug }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}{% if current_category %}&category={{ current_category.slug }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Next</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5 bg-white rounded shadow-sm border">
+                <i class="bi bi-search fs-1 text-muted mb-3"></i>
+                <h4 class="fw-bold">No products found</h4>
+                <p class="text-muted">We couldn't find any products matching your current criteria.</p>
+                <a href="{% url 'store:product_list' %}" class="btn btn-primary mt-2">Clear Filters & View All</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
