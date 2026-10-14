@@ -1,3 +1,10 @@
+
+A modern and responsive E-commerce Store web application designed to provide users with a smooth online shopping experience. The project includes product browsing, shopping cart functionality, and a user-friendly interface for managing online purchases.
+
+
+
+
+
 # 🛒 CodeAlpha E-commerce Store
 
 <div align="center">
